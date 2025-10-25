@@ -13,12 +13,15 @@
 #     print(data["gameData"])
 # except requests.exceptions.RequestException as e:
 #     print("Error:", e)
-
+import os 
 import requests
 
+from dotenv import load_dotenv
+
+load_dotenv()
 # ---------- CONFIG ----------
-api_key = "RGAPI-b8b291e7-80c1-4838-9814-381f77b70cfd"   # Replace with your Riot API key
-match_id = "NA1_5367496556"
+api_key = os.getenv("RIOT_API_KEY")   
+match_id = os.getenv("MATCH_ID")
 # ----------------------------
 
 url = f"https://americas.api.riotgames.com/lol/match/v5/matches/{match_id}/timeline"

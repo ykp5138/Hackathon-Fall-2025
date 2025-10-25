@@ -1,0 +1,37 @@
+html {
+    font-family: Monospace;
+    background-color: #1a688d;
+}
+
+h1 {
+    color:#ffffff;
+    font-size: 150px;
+    text-align: center;
+}
+p{
+    color:#ffffff;
+    font-size: 20px;
+    text-align: center;
+}
+
+button {
+    background-color: white;
+    display: block;
+    margin: 0 auto;
+    padding: 40px 100px;
+    background-color: white;
+    font-size: 2em;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.buttontext {
+    color: gold;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+button:hover{
+    background-color: black;
+}
+
