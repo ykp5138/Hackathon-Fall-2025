@@ -23,19 +23,21 @@ HEADERS = {"X-Riot-Token": API_KEY}
 
 
 
-
+#use to get around rate limit
 request_times = []
 
 def rate_limited_request(url, headers, params=None):
     """Make rate-limited API request (20/sec, 100/2min)"""
     global request_times
-    
+
+
+    #gets realworld time
     current_time = time.time()
     
-    # Remove requests older than 2 minutes
+    # Remove requests older than 2 minutes (100 requests every 2 mins)
     request_times = [t for t in request_times if current_time - t < 120]
     
-    # Count recent requests
+    # Count recent requests (20 requests each second)
     requests_last_second = sum(1 for t in request_times if current_time - t < 1)
     requests_last_2min = len(request_times)
     
@@ -88,23 +90,24 @@ def get_challenger_players():
     print(f"✓ Found {len(players)} high-elo players")
     return players
 
-def get_puuid(summoner_name):
-    """Get puuid from summoner name"""
-    # URL encode the name to handle spaces/special chars
-    import urllib.parse
-    encoded_name = urllib.parse.quote(summoner_name)
+# def get_puuid(summoner_name):
+#     """Get puuid from summoner name"""
+#     # URL encode the name to handle spaces/special chars
+#     import urllib.parse
+#     encoded_name = urllib.parse.quote(summoner_name)
     
-    url = f"{BASE_URL}/lol/summoner/v4/summoners/by-name/{encoded_name}"
-    response = requests.get(url, headers=HEADERS)
+#     url = f"{BASE_URL}/lol/summoner/v4/summoners/by-name/{encoded_name}"
+#     response = requests.get(url, headers=HEADERS)
     
-    if response.status_code == 200:
-        return response.json()['puuid']
-    return None
+#     if response.status_code == 200:
+#         return response.json()['puuid']
+#     return None
 
 def get_match_history(puuid, count=50):
     """Get recent ranked match IDs"""
     url = f"{PLATFORM_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids"
     params = {
+        # queue ensures only ranked and casual matches are considered (no game modes)
         'queue': 420,
         'start': 0,
         'count': count

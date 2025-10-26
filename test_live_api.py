@@ -89,6 +89,26 @@ for frame in timeline["info"]["frames"]:
                 elif killer_id in red_participants:
                     red_stats["dragons"] += 1
 
-print("First 10 minutes stats:")
-print("Blue Team:", blue_stats)
-print("Red Team:", red_stats)
+# print("First 10 minutes stats:")
+# print("Blue Team:", blue_stats)
+# print("Red Team:", red_stats)
+
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+import pickle
+
+# Load the CSV
+data = pd.read_csv('lol_training_data_20251025_172038.csv')
+
+print("📊 Data loaded successfully!")
+print(f"Total samples: {len(data)}")
+print(f"Blue wins: {data['blue_win'].sum()}")
+print(f"Red wins: {len(data) - data['blue_win'].sum()}")
+
+print(data.head(10))
+print(f"\nTotal rows: {len(data)}")

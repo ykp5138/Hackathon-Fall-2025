@@ -101,49 +101,47 @@ def will_die_within(player_name, start_t, horizon_sec=10):
 training_rows = []
 
 if __name__ == "__main__":
-    while True:
-        try:
-            game_t, snapshot = get_live_state()
-        except Exception as e:
-            print("Not in game / can't read live data:", e)
-            break
+    try:
+        while True:
+            try:
+                game_t, snapshot = get_live_state()
+            except Exception as e:
+                print("Not in game / can't read live data:", e)
+                break
 
-        # Add this frame to history
-        recent_frames.append((game_t, snapshot))
+            recent_frames.append((game_t, snapshot))
 
-        # Label frames that are now 10s old
-        # Example: if current time is 200s, then frames around 190s can now be labeled
-        cutoff_age = 10  # seconds
-        to_label = []
-        for (past_t, past_snapshot) in list(recent_frames):
-            if game_t - past_t >= cutoff_age:
-                to_label.append((past_t, past_snapshot))
+            cutoff_age = 10
+            to_label = []
+            for (past_t, past_snapshot) in list(recent_frames):
+                if game_t - past_t >= cutoff_age:
+                    to_label.append((past_t, past_snapshot))
 
-        # For each past frame that just became "labelable"
-        for (past_t, past_snapshot) in to_label:
-            for name, feats in past_snapshot.items():
-                label = will_die_within(name, past_t, horizon_sec=10)
+            for (past_t, past_snapshot) in to_label:
+                for name, feats in past_snapshot.items():
+                    label = will_die_within(name, past_t, horizon_sec=10)
 
-                row = {
-                    "t": past_t,
-                    "name": name,
-                    "hp_pct": feats["hp_pct"],
-                    "allies_near": feats["allies_near"],
-                    "enemies_near": feats["enemies_near"],
-                    "gold": feats["gold"],
-                    "level": feats["level"],
-                    "will_die_10s": label
-                }
+                    row = {
+                        "t": past_t,
+                        "name": name,
+                        "hp_pct": feats["hp_pct"],
+                        "allies_near": feats["allies_near"],
+                        "enemies_near": feats["enemies_near"],
+                        "gold": feats["gold"],
+                        "level": feats["level"],
+                        "will_die_10s": label
+                    }
 
-                training_rows.append(row)
+                    training_rows.append(row)
 
-                # (optional) print positive examples so you can see it working live
-                if label == 1:
-                    print("⚠ DEATH SOON LABEL FOUND")
-                    print(row)
+                    if label == 1:
+                        print("⚠ DEATH SOON LABEL FOUND")
+                        print(row)
 
-            # after labeling that past frame, we can optionally remove it
-            # but keeping it in deque is fine because maxlen already limits size
-
-        # Sleep ~1 second between polls
-        time.sleep(1)
+            time.sleep(1)
+    finally:
+        # dump rows when you exit the script
+        import pandas as pd
+        df = pd.DataFrame(training_rows)
+        df.to_csv("risk_training_data.csv", index=False)
+        print("Saved", len(training_rows), "rows to risk_training_data.csv")
