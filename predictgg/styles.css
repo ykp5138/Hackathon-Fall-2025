@@ -9,6 +9,8 @@
 }
 
 /* ---------- Page Layout / Animated Background ---------- */
+
+
 body {
   margin: 0;
   padding: 0;
@@ -50,13 +52,37 @@ body::after {
 
 /* ---------- Title ---------- */
 .prodname h1 {
+  position: relative;
   font-weight: 800;
   font-size: 4rem;
-  color: var(--gold);
-  letter-spacing: 2px;
-  margin-bottom: 10px;
-  margin-top: -100px;
+  margin-bottom: -15px;
+  display: inline-block;
+  overflow: hidden;
+  background: linear-gradient(90deg, #9C7C3F, #E8D6A7, #9C7C3F);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200%;
+  animation: shimmer 6s linear infinite;
 }
+@keyframes shimmer {
+  0%   { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+
+.prodname::after {
+  content: "";
+  display: block;
+  width: 100px;
+  height: 2px;
+  margin: 12px auto 0;
+  background: linear-gradient(90deg, transparent, #C8AA6E, transparent);
+  animation: trimPulse 3s ease-in-out infinite;
+}
+@keyframes trimPulse {
+  0%,100% { opacity: .6; transform: scaleX(0.8); }
+  50%     { opacity: 1; transform: scaleX(1); }
+}
+
 
 /* ---------- Description ---------- */
 p {
@@ -65,7 +91,9 @@ p {
   color: var(--gold);
   font-weight: 300;
   font-size: 1.1rem;
-  margin: 0 auto 2rem;
+  margin-left: 0 auto 2rem;
+  margin-right: 0 auto 2rem;
+  margin-bottom: 0 auto 2rem;
 }
 
 /* ---------- Button ---------- */
