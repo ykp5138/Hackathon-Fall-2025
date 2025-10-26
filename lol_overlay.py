@@ -481,7 +481,7 @@ Give 3 SHORT, actionable tips (10 words each max) for YOUR team to COMEBACK. Be 
             self.root.attributes('-alpha', 1.0)
             self.root.update()
             time.sleep(0.2)
-            self.root.attributes('-alpha', 0.95)
+            self.root.attributes('-alpha', 0.70)
             self.root.update()
             time.sleep(0.2)
     
