@@ -12,18 +12,31 @@ MODEL_FILE = "death_model.pkl"
 def get_live_snapshot():
     """
     Grab current frame from the League liveclientdata API.
-    Return a dict of your player's features (hp_pct, level, etc.)
-    or None if we can't get valid data yet.
+    Return a dict of your player's features, or None.
     """
     try:
         r = requests.get(LIVE_URL, verify=False, timeout=0.5)
         r.raise_for_status()
         raw = r.json()
     except Exception as e:
-        print("[warn] could not read live client:", e)
+        print("[warn] could not read live client:", repr(e))
         return None
 
-    # activePlayer is YOU
+    # DEBUG: show top-level keys once so we know what mode we're in
+    # (activePlayer missing = you're spectating or the game hasn't started)
+    if not isinstance(raw, dict):
+        print("[debug] raw was not dict:", type(raw))
+        return None
+    missing_keys = []
+    if "activePlayer" not in raw:
+        missing_keys.append("activePlayer")
+    if "allPlayers" not in raw:
+        missing_keys.append("allPlayers")
+    if missing_keys:
+        print("[debug] missing keys from live data:", missing_keys)
+        # if activePlayer is missing we literally cannot get hp_pct
+        return None
+
     me = raw.get("activePlayer", {}) or {}
     stats = me.get("championStats", {}) or {}
 
@@ -33,23 +46,33 @@ def get_live_snapshot():
     if cur_hp is not None and max_hp not in [None, 0]:
         hp_pct = float(cur_hp) / float(max_hp)
     else:
-        # can't evaluate risk if we don't even know HP
         hp_pct = None
 
     level = me.get("level")
     gold = me.get("currentGold")
 
-    # now we need scoreboard info for you from allPlayers
-    you_name = me.get("summonerName") or me.get("riotId") or me.get("riotIdGameName")
+    you_name = (
+        me.get("summonerName")
+        or me.get("riotId")
+        or me.get("riotIdGameName")
+    )
+
     kills = deaths = assists = cs = None
 
     ap_list = raw.get("allPlayers", [])
     if isinstance(ap_list, dict):
         ap_list = list(ap_list.values())
 
+    # find yourself in allPlayers to get scoreboard stuff
+    found_self = False
     for p in ap_list:
-        pname = p.get("summonerName") or p.get("riotId") or p.get("riotIdGameName")
+        pname = (
+            p.get("summonerName")
+            or p.get("riotId")
+            or p.get("riotIdGameName")
+        )
         if pname == you_name:
+            found_self = True
             scores = p.get("scores", {}) or {}
             kills = scores.get("kills")
             deaths = scores.get("deaths")
@@ -57,7 +80,17 @@ def get_live_snapshot():
             cs = scores.get("creepScore")
             break
 
-    # We only return a feature dict if we have enough info
+    # debug if we couldn't match your name in allPlayers
+    if not found_self:
+        print("[debug] couldn't match self in allPlayers. you_name=", you_name)
+        print("[debug] available names:", [
+            (
+                q.get("summonerName")
+                or q.get("riotId")
+                or q.get("riotIdGameName")
+            ) for q in ap_list
+        ])
+
     feats = {
         "hp_pct": hp_pct,
         "level": level,
@@ -68,11 +101,25 @@ def get_live_snapshot():
         "gold": gold,
     }
 
-    # basic sanity filter: if hp_pct is None you're probably not "in game" yet
-    if (hp_pct is None) or (level is None):
+    # sanity: do we at least have hp_pct and level?
+    if hp_pct is None or level is None:
+        print("[debug] missing hp_pct/level. feats now =", feats)
         return None
 
+    # sanity: did we fail to get deaths/kills/etc?
+    if deaths is None:
+        print("[debug] scoreboard not linked yet. feats now =", feats)
+        # we won't bail here; we'll just fill defaults below
+
+    # fill like training did
+    if feats["gold"] is None:
+        feats["gold"] = -1.0
+    for k in ["kills", "deaths", "assists", "cs"]:
+        if feats[k] is None:
+            feats[k] = 0
+
     return feats
+
 
 
 def load_model():
