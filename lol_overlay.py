@@ -29,7 +29,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # ---------- CONFIG ----------
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")  # Your OpenRouter key
+OPENROUTER_API_KEY = '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'  # Your OpenRouter key
 CHECK_INTERVALS = [10, 20, 30, 40]
 # ----------------------------
 

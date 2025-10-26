@@ -6,7 +6,7 @@ import time
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-LIVE_URL = "https://127.0.0.1:2999/liveclientdata/allgamedata"
+LIVE_URL = "http://127.0.0.1:2999/liveclientdata/allgamedata"
 MODEL_FILE = "death_model.pkl"
 
 def get_live_snapshot():
