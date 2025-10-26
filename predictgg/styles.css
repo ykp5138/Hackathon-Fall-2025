@@ -54,7 +54,8 @@ body::after {
   font-size: 4rem;
   color: var(--gold);
   letter-spacing: 2px;
-  margin-bottom: 0.5rem;
+  margin-bottom: 10px;
+  margin-top: -100px;
 }
 
 /* ---------- Description ---------- */
@@ -89,3 +90,6 @@ button:hover {
   font-size: 1.1rem;
   letter-spacing: 0.5px;
 }
+
+
+
